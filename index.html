@@ -184,12 +184,8 @@
             function render() {
                 frameCount += 1;
 				planeGeo.verticesNeedUpdate = true;
-				//var start_sx = sx + time/5000000000000;
 				drawTrench(sx - frameCount/60, false);
 				putBall();
-				//console.log(sx + time/10000000000)
-				//planeGeo.vertices[10000].z += time/5000000000000;
-                //plane.rotation.y = plane.rotation.z = 0.01 * time;
                 renderer.render( scene, camera );
             }
 
