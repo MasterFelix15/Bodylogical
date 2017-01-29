@@ -18,13 +18,12 @@
 var grid = 100;
 var ballComplexity = 24;
 var a = 1/5000;
-var b = 1/2000;
+var b = 1/500;
 var c = -0.3;
 var d = -1/200;
 var sx = 70;
-var bally = 10;
+var bally = 2;
 var ballRadius = 0.5;
-var ballz;
 var tmax = 3;
 var t = 2;
 var wireFrameOn = true;
