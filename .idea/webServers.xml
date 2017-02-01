@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="212c9e2f-814d-45a6-b0f0-f87268fd5b6c" name="sf2" url="http://138.197.222.62">
+        <fileTransfer host="138.197.222.62" port="22" rootFolder="/var/www/138.197.222.62" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
