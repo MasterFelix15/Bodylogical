@@ -34,7 +34,7 @@ function drawTrench(sx, firstTime) {
             }
             if (x == parseInt(cur_sx) && y == bally) {
                 ballx = cur_sx;
-                ballz = z;
+                ballz = a*Math.pow(ballx,2) + b*Math.pow(bally,2) + 2*c*t/tmax + ballRadius;
             }
             if (firstTime) {
                 planeGeo.vertices[j].y += (planeLength - planeWidth)/2;
@@ -47,7 +47,7 @@ function drawTrench(sx, firstTime) {
 function putBall() {
     ball.position.x = (ballx-grid/2)/grid*planeWidth;
     ball.position.y = (bally-10)/grid*planeLength;
-    ball.position.z = a*Math.pow(ballx,2) + b*Math.pow(bally,2) + c*t/tmax + ballRadius - 0.2;
+    ball.position.z = ballz;
 }
 
 function produceMeshGroup() {
