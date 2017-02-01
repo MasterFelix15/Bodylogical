@@ -11,9 +11,12 @@
 		<div id="container"></div>
 		<script src="js/libs/three.min.js"></script>
 		<script src="js/libs/controls/OrbitControls.js"></script>
-		<script src="js/Config.js"></script>
 		<script src="js/Detector.js"></script>
 		<script src="js/libs/stats.min.js"></script>
+		<script src="js/libs/dat.gui.min.js"></script>
+		<script src="js/Gui.js"></script>
+		<script src="js/Mesh.js"></script>
+
 
 		<script type="x-shader/x-vertex" id="vertexshader">
 			uniform float amplitude;
@@ -44,109 +47,31 @@
 		</script>
 
 		<script>
-            if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+            // if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
             var renderer, scene, camera, stats;
-            var plane, ball, planeGeo, ballGeo;
-            var planeWidth = 10;
-            var planeLength = 50;
-            var trenchWidth = 20;
-            var ballx, ballz;
+
+            var gui = null;
+            var animation_playing = false;
+            // measure time with frame
+            var frameCount = 0;
+            var ballSpeed = 1/30;
+            var ballSpeedMax = 1/10;
+            var a_max = a*2;
+            var b_max = b*2;
+            var c_max = c*2;
+            var d_max = d*2;
 
             init();
             animate();
 
-            function drawTrench(sx, firstTime) {
-                for (var i = 0; i < planeGeo.vertices.length; i+=(grid+1)) {
-                    for (var j = i; j < i+(grid+1); j++) {
-                        var x = j - i;
-                        var y = grid - i / (grid+1);
-                        var z = a*Math.pow(x,2) + b*Math.pow(y,2);
-                        var cur_sx = d*Math.pow(y,2) + sx;
-                        if (x >= cur_sx - trenchWidth/2 && x <= cur_sx + trenchWidth/2) {
-                            var theta = (x - cur_sx)/-(trenchWidth/2)*Math.PI;
-                            z += c*(Math.cos(theta)+1)*t/tmax;
-                        }
-                        if (x == parseInt(cur_sx) && y == bally) {
-                            ballx = cur_sx;
-                            ballz = z;
-                        }
-                        if (firstTime) {
-                            planeGeo.vertices[j].y += (planeLength - planeWidth)/2;
-						}
-                        planeGeo.vertices[j].z = z;
-                    }
-                }
-            }
-
-            function putBall() {
-                ball.position.x = (ballx-grid/2)/grid*planeWidth;
-                ball.position.y = (bally-10)/grid*planeLength;
-                ball.position.z = ballz + ballRadius;
-			}
-
             function init() {
                 camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-                camera.position.z = 10;
+                camera.position.y = -9;
+                camera.position.z = 4;
                 scene = new THREE.Scene();
-                planeGeo = new THREE.PlaneGeometry( planeWidth, planeLength, grid, grid );
-                planeGeo.dynamic = true;
-
-				drawTrench(sx, true);
-
-                var planeMaterial = new THREE.MeshPhongMaterial({
-                    color: 0x6699CC,
-                    side: THREE.DoubleSide,
-                    wireframe: wireFrameOn,
-                    shading: THREE.flatShading,
-                    shininess: 20
-                });
-                plane =  new THREE.Mesh( planeGeo, planeMaterial );
-                var group = new THREE.Group();
-                scene.add(group);
-                group.add(plane);
-
-                ballGeo = new THREE.SphereGeometry( ballRadius, ballComplexity,  ballComplexity);
-
-                var ballMaterial = new THREE.MeshPhongMaterial({
-                    color: 0x99FFCC,
-                    wireframe: wireFrameOn,
-                    shading: THREE.SmoothShading,
-                    shininess: 500
-                });
-
-                ball = new THREE.Mesh( ballGeo, ballMaterial);
-
-                group.add(ball);
-                putBall();
-
-                var materialy = new THREE.LineBasicMaterial({ color: 0x138D75 });
-
-                var yaxisGeo = new THREE.Geometry();
-                yaxisGeo.vertices.push( new THREE.Vector3( -5, -5, 0 ), new THREE.Vector3( -5, 5, 0 ) );
-                var yaxis = new THREE.Line( yaxisGeo, materialy );
-                scene.add( yaxis );
-
-                var materialx = new THREE.LineBasicMaterial({ color: 0xFF0033 });
-
-                var xaxisGeo = new THREE.Geometry();
-                xaxisGeo.vertices.push( new THREE.Vector3( -5, -5, 0 ), new THREE.Vector3( 5, -5, 0 ) );
-                var xaxis = new THREE.Line( xaxisGeo, materialx );
-                scene.add( xaxis );
-
-                var materialz = new THREE.LineBasicMaterial({ color: 0x2471A3 });
-
-                var zaxisGeo = new THREE.Geometry();
-                zaxisGeo.vertices.push( new THREE.Vector3( -5, -5, 0 ), new THREE.Vector3( -5, -5, 10 ) );
-                var zaxis = new THREE.Line( zaxisGeo, materialz );
-                scene.add( zaxis );
-
                 var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
                 directionalLight.position.set( 20, 20, 20 );
-                var directionalLight2 = new THREE.DirectionalLight( 0xffffff, 1 );
-                directionalLight2.position.set( -20, -20, -20 );
                 scene.add( directionalLight );
-                scene.add( directionalLight2 );
-
 
                 renderer = new THREE.WebGLRenderer();
                 renderer.setClearColor( 0xCCCCCC );
@@ -157,14 +82,30 @@
                 controls.minDistance = 1;
                 controls.maxDistance = 100;
 
-
-
                 var container = document.getElementById( 'container' );
                 container.appendChild( renderer.domElement );
 
                 stats = new Stats();
                 container.appendChild( stats.dom );
                 window.addEventListener( 'resize', onWindowResize, false );
+
+                produceMeshGroup();
+                scene.add(group);
+
+                gui = new Gui();
+
+
+                window.addEventListener( 'start-animation', onStartAnimation );
+                window.addEventListener( 'pause-animation', onPauseAnimation );
+                window.addEventListener( 'reset-animation', onResetAnimation );
+                window.addEventListener( 'value-a-change', onValueAChange );
+                window.addEventListener( 'value-b-change', onValueBChange );
+                window.addEventListener( 'value-c-change', onValueCChange );
+                window.addEventListener( 'value-d-change', onValueDChange );
+                window.addEventListener( 'speed-change', onSpeedChange );
+                window.addEventListener( 'start-x-change', onStartXChange );
+                window.addEventListener( 'toggle-wire-frame', onToggleWireFrame );
+
             }
 
             function onWindowResize() {
@@ -173,19 +114,69 @@
                 renderer.setSize( window.innerWidth, window.innerHeight );
             }
 
+            function onStartAnimation() {
+				animation_playing = true;
+            }
+
+            function onPauseAnimation() {
+                animation_playing = false;
+            }
+
+            function onResetAnimation() {
+                frameCount = 0;
+                updateAll(sx);
+                animation_playing = false;
+            }
+
+            function onValueAChange( event ) {
+				a = event.detail.value * a_max;
+                updateAll(sx);
+            }
+
+            function onValueBChange( event ) {
+                b = event.detail.value * b_max;
+                updateAll(sx);
+            }
+
+            function onValueCChange( event ) {
+                c = event.detail.value * c_max;
+                updateAll(sx);
+            }
+
+            function onValueDChange( event ) {
+                d = event.detail.value * d_max;
+                updateAll(sx);
+            }
+
+            function onSpeedChange( event ) {
+                ballSpeed = event.detail.value * ballSpeedMax;
+                updateAll(sx);
+            }
+
+            function onStartXChange( event ) {
+				sx = event.detail.value * grid;
+				updateAll(sx);
+            }
+
+            function onToggleWireFrame( event ) {
+				wireFrameOn = event.detail.shouldShow;
+				scene.remove(group);
+				produceMeshGroup();
+				scene.add(group);
+				updateAll(sx);
+            }
+
             function animate() {
                 requestAnimationFrame( animate );
                 render();
                 stats.update();
             }
 
-            var frameCount = 0;
-
             function render() {
-                frameCount += 1;
-				planeGeo.verticesNeedUpdate = true;
-				drawTrench(sx - frameCount/60, false);
-				putBall();
+                if (animation_playing) {
+                    frameCount += 1;
+                    updateAll(sx - frameCount*ballSpeed);
+				}
                 renderer.render( scene, camera );
             }
 

@@ -25926,7 +25926,7 @@
 
     		// computes for inPt the corresponding point inPt' on a new contour
     		//   shifted by 1 unit (length of normalized vector) to the left
-    		// if we walk along contour clockwise, this new contour is outside the old one
+    		// if we start_x along contour clockwise, this new contour is outside the old one
     		//
     		// inPt' is the intersection of the two lines parallel to the two
     		//  adjacent edges of inPt at a distance of 1 unit on the left side.
@@ -36779,7 +36779,7 @@
 
     	},
 
-    	// Time Scale Control
+    	// a_value Control
 
     	// set the weight stopping any scheduled warping
     	// although .paused = true yields an effective time scale of zero, this
