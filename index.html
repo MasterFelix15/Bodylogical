@@ -105,6 +105,7 @@
                 window.addEventListener( 'speed-change', onSpeedChange );
                 window.addEventListener( 'start-x-change', onStartXChange );
                 window.addEventListener( 'toggle-wire-frame', onToggleWireFrame );
+                window.addEventListener( 'keypress', onKeyPress );
 
             }
 
@@ -158,6 +159,15 @@
 				updateAll(sx);
             }
 
+            function onKeyPress ( event ) {
+                if (event.keyCode == 100) {
+                    sx += 2;
+				} else if (event.keyCode == 97) {
+                    sx -= 2;
+				}
+				updateAll(sx);
+			}
+
             function onToggleWireFrame( event ) {
 				wireFrameOn = event.detail.shouldShow;
 				scene.remove(group);
@@ -175,7 +185,7 @@
             function render() {
                 if (animation_playing) {
                     frameCount += 1;
-                    updateAll(sx - frameCount*ballSpeed);
+                    updateAll(sx - frameCount*ballSpeed*0.1);
 				}
                 renderer.render( scene, camera );
             }
