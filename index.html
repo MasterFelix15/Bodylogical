@@ -127,7 +127,7 @@
 
             function onResetAnimation() {
                 frameCount = 0;
-                updateAll(sx);
+                updateAll(0);
                 animation_playing = false;
             }
 
@@ -152,7 +152,7 @@
             }
 
             function onSpeedChange( event ) {
-                ballSpeed = event.detail.value * ballSpeedMax;
+                ballSpeed = event.detail.value;
                 updateAll(sx);
             }
 
@@ -187,7 +187,7 @@
             function render() {
                 if (animation_playing) {
                     frameCount += 1;
-                    updateAll(sx - frameCount*ballSpeed*0.1);
+                    updateAll(frameCount/20*ballSpeed);
 				}
                 renderer.render( scene, camera );
             }

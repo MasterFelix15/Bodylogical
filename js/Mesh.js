@@ -23,7 +23,7 @@ var tmax = 3;
 // variables to control the sinking of trench
 var steadyTime = 2;
 var maxTime = 5;
-var trenches = [65, 70];
+var trenches = [];
 var t = 2;
 var wireFrameOn = false;
 var group;
@@ -36,13 +36,16 @@ var lineGeos = [];
 
 var lastframeX = sx;
 var startYear = 25;
-var yearScale = 0.5;
+var yearScale = 0.25;
 var bmiTable = {};
 
 var sleep = 0;
 var calories = 0;
 var steps = 0;
 var preset = "0/0/0";
+var deltaTime = 182.5 * 24 * 60;
+var lineStartOffset = lineStartY;
+var lineTimeCounter;
 
 function Trench(center, min, max, depth) {
     this.center = center;
@@ -64,20 +67,25 @@ function addTrench(center) {
     if (center > trenches[trenches.length-1].center) {
 
     }
-
 }
 
-function drawTrench(sx, firstTime) {
-    var ageLineOffset = Math.sqrt((sx-lastframeX)/d);
-    console.log(ageLineOffset);
+function drawTrench(timeOffset, firstTime) {
+    lineTimeCounter = timeOffset - parseInt(timeOffset);
+    lineStartOffset = lineStartY - lineTimeCounter;
+    console.log(lineStartOffset);
     for (var i = planeGeo.vertices.length - grid - 1; i >= 0; i-=(grid+1)) {
         for (var j = i; j < i+(grid+1); j++) {
             var x = j - i;
             var y = parseInt(grid - i / (grid+1));
             var z = a*Math.pow(x,2) + b*Math.pow(y,2);
             /////////////////////////////////////////////////
-            var cur_time = (y*yearScale+startYear)*365*24*60; // time is measured in minutes
-            var bmi = bmiTable[preset][cur_time];
+
+            // calculate current time smoothly
+            var cur_time = ((y+timeOffset)*yearScale+startYear)*365*24*60; // time is measured in minutes
+            var prev_point = Math.floor(cur_time/deltaTime) * deltaTime;
+            var next_point = prev_point + deltaTime;
+            var ratio = (next_point - cur_time)/deltaTime;
+            var bmi = ratio * bmiTable[preset][prev_point] + (1-ratio) * bmiTable[preset][next_point];
             var cur_sx = (30 - bmi)/10.0*100;
 
             // var cur_sx = d*Math.pow(y,2) + sx;
@@ -95,12 +103,14 @@ function drawTrench(sx, firstTime) {
             planeGeo.vertices[j].z = z;
 
             // process frame line offset
-
             if ((y-lineStartY)%lineOffset == 0) {
-                lineGeos[(y-lineStartY)/lineOffset].vertices[x] = new THREE.Vector3 (
+
+                var zOffset = b*Math.pow(y,2) - b*Math.pow(y+lineStartOffset-1,2);
+                //console.log(lineStartOffset);
+                lineGeos[parseInt((y-lineStartY)/lineOffset)].vertices[x] = new THREE.Vector3 (
                     planeGeo.vertices[j].x,
-                    planeGeo.vertices[j].y,
-                    planeGeo.vertices[j].z + 0.01);
+                    planeGeo.vertices[j].y - (1-lineStartOffset),
+                    planeGeo.vertices[j].z + 0.05 - zOffset);
             }
 
             if (x%(grid/BMILineNum) == 0) {
@@ -242,7 +252,7 @@ function produceMeshGroup() {
 
     console.log(lineGeos.length);
 
-    drawTrench(sx, true);
+    drawTrench(0, true);
     //drawMultipleTrenches(trenches, true);
 
 
@@ -262,7 +272,6 @@ function produceMeshGroup() {
     ball = new THREE.Mesh( ballGeo, ballMaterial);
     group.add(ball);
     putBall();
-
 
     /////////////////////////////////////////////////
     // var xmlhttp;
@@ -286,12 +295,12 @@ function produceMeshGroup() {
     /////////////////////////////////////////////////
 }
 
-function updateAll(cur_sx) {
+function updateAll(timeOffset) {
     preset = sleep.toString()+"/"+calories.toString()+"/"+steps.toString();
     planeGeo.verticesNeedUpdate = true;
     for (var i = 0; i < lineGeos.length; i++) {
         lineGeos[i].verticesNeedUpdate = true;
     }
-    drawTrench(cur_sx, false);
+    drawTrench(timeOffset, false);
     putBall();
 }

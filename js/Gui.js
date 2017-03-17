@@ -28,14 +28,14 @@ function Gui() {
         config.add( controls, "sleep", -2, 2, 1 ).listen().onChange( controls.change_value_a );
         config.add( controls, "calories", -300, 300, 100 ).listen().onChange( controls.change_value_b );
         config.add( controls, "steps", -1500, 6000, 1500 ).listen().onChange( controls.change_value_c );
-        config.add( controls, "d_value", 0, 100, 0.01 ).listen().onChange( controls.change_value_d );
+        // config.add( controls, "d_value", 0, 100, 0.01 ).listen().onChange( controls.change_value_d );
 
         playback.add( controls, "start" );
         playback.add( controls, "pause" );
         playback.add( controls, "reset" );
 
         usr.add( controls, "speed", 0, 1, 0.01 ).listen().onChange( controls.change_speed );
-        usr.add( controls, "start_x", 0, 1, 0.01 ).listen().onChange( controls.change_start_x );
+        // usr.add( controls, "start_x", 0, 1, 0.01 ).listen().onChange( controls.change_start_x );
 
         config.open();
         playback.open();
