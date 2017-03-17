@@ -1,14 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" serverName="sf2" showDifferentInSync="false">
-    <serverData>
-      <paths name="sf2">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/public_html" local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-    </serverData>
-  </component>
+  <component name="PublishConfigData" showDifferentInSync="false" />
 </project>

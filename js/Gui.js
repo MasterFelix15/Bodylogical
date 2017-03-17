@@ -7,9 +7,9 @@ function Gui() {
 
         gui: null,
         "Wire Frame": true,
-        "a_value": 0.5,
-        "b_value": 0.5,
-        "c_value": 0.5,
+        "sleep": 0,
+        "calories": 0,
+        "steps": 0,
         "d_value": 0.5,
         "speed": 0.33,
         "start_x": 0.66
@@ -25,10 +25,10 @@ function Gui() {
         var usr = controls.gui.addFolder( 'User Settings' );
 
         config.add( controls, "Wire Frame" ).onChange( controls.wireFrameToggle );
-        config.add( controls, "a_value", 0, 1, 0.01 ).listen().onChange( controls.change_value_a );
-        config.add( controls, "b_value", 0, 1, 0.01 ).listen().onChange( controls.change_value_b );
-        config.add( controls, "c_value", 0, 1, 0.01 ).listen().onChange( controls.change_value_c );
-        config.add( controls, "d_value", 0, 1, 0.01 ).listen().onChange( controls.change_value_d );
+        config.add( controls, "sleep", -2, 2, 1 ).listen().onChange( controls.change_value_a );
+        config.add( controls, "calories", -300, 300, 100 ).listen().onChange( controls.change_value_b );
+        config.add( controls, "steps", -1500, 6000, 1500 ).listen().onChange( controls.change_value_c );
+        config.add( controls, "d_value", 0, 100, 0.01 ).listen().onChange( controls.change_value_d );
 
         playback.add( controls, "start" );
         playback.add( controls, "pause" );
@@ -66,22 +66,22 @@ function Gui() {
 
     controls.change_value_a = function() {
 
-        var value_a = { detail: { value: controls[ 'a_value' ] } };
+        var value_a = { detail: { value: controls[ 'sleep' ] } };
         window.dispatchEvent( new CustomEvent( 'value-a-change', value_a ) );
-
-    };
-
-    controls.change_value_c = function() {
-
-        var value_c = { detail: { value: controls[ 'c_value' ] } };
-        window.dispatchEvent( new CustomEvent( 'value-c-change', value_c ) );
 
     };
 
     controls.change_value_b = function() {
 
-        var value_b = { detail: { value: controls[ 'b_value' ] } };
+        var value_b = { detail: { value: controls[ 'calories' ] } };
         window.dispatchEvent( new CustomEvent( 'value-b-change', value_b ) );
+
+    };
+
+    controls.change_value_c = function() {
+
+        var value_c = { detail: { value: controls[ 'steps' ] } };
+        window.dispatchEvent( new CustomEvent( 'value-c-change', value_c ) );
 
     };
 
@@ -116,6 +116,10 @@ function Gui() {
 
         window.dispatchEvent( new CustomEvent( 'toggle-wire-frame', data ) );
 
+    };
+
+    controls.change_d = function (value) {
+        controls['d_value'] = value;
     };
 
 

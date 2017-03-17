@@ -35,6 +35,14 @@ var BMILineIndexOffset = grid/lineOffset;
 var lineGeos = [];
 
 var lastframeX = sx;
+var startYear = 25;
+var yearScale = 0.5;
+var bmiTable = {};
+
+var sleep = 0;
+var calories = 0;
+var steps = 0;
+var preset = "0/0/0";
 
 function Trench(center, min, max, depth) {
     this.center = center;
@@ -67,7 +75,12 @@ function drawTrench(sx, firstTime) {
             var x = j - i;
             var y = parseInt(grid - i / (grid+1));
             var z = a*Math.pow(x,2) + b*Math.pow(y,2);
-            var cur_sx = d*Math.pow(y,2) + sx;
+            /////////////////////////////////////////////////
+            var cur_time = (y*yearScale+startYear)*365*24*60; // time is measured in minutes
+            var bmi = bmiTable[preset][cur_time];
+            var cur_sx = (30 - bmi)/10.0*100;
+
+            // var cur_sx = d*Math.pow(y,2) + sx;
             if (x >= cur_sx - trenchWidth/2 && x <= cur_sx + trenchWidth/2) {
                 var theta = (x - cur_sx) / -(trenchWidth / 2) * Math.PI;
                 z += c * (Math.cos(theta) + 1) * t / tmax;
@@ -96,7 +109,6 @@ function drawTrench(sx, firstTime) {
                     planeGeo.vertices[j].y,
                     planeGeo.vertices[j].z + 0.01);
             }
-
         }
     }
     lastframeX = sx;
@@ -134,6 +146,46 @@ function putBall() {
 }
 
 function produceMeshGroup() {
+
+    /////////////////////////////////////////////////
+    // Check for the various File API support.
+    var data = "";
+
+    function readTextFile(file)
+    {
+        var rawFile = new XMLHttpRequest();
+        rawFile.open("GET", file, false);
+        rawFile.onreadystatechange = function ()
+        {
+            if(rawFile.readyState === 4)
+            {
+                if(rawFile.status === 200 || rawFile.status == 0)
+                {
+                    data = rawFile.responseText;
+                }
+            }
+        };
+        rawFile.send(null);
+    }
+
+    readTextFile("./Pete.rcd");
+
+    var arrayOfRecords = data.split("\n");
+    for (var i = 0; i < arrayOfRecords.length; i++) {
+        var thisLine = arrayOfRecords[i];
+        var attributes = thisLine.split(",");
+        var m_time = parseInt(attributes[0]);
+        var m_bmi = parseFloat(attributes[1]);
+        var m_sleep = parseInt(attributes[2]);
+        var m_cal = parseInt(attributes[3]);
+        var m_steps = parseInt(attributes[4]);
+        var preset = m_sleep.toString()+"/"+m_cal.toString()+"/"+m_steps.toString();
+        if (!(preset in bmiTable)) {
+            bmiTable[preset] = {};
+        }
+        bmiTable[preset][m_time] = m_bmi;
+    }
+    /////////////////////////////////////////////////
 
     /////////////////////////////////////////////////
     var ageLineMaterial = new THREE.LineBasicMaterial({
@@ -211,14 +263,35 @@ function produceMeshGroup() {
     group.add(ball);
     putBall();
 
+
+    /////////////////////////////////////////////////
+    // var xmlhttp;
+    // if (window.XMLHttpRequest) {
+    //     // code for IE7+, Firefox, Chrome, Opera, Safari
+    //     xmlhttp = new XMLHttpRequest();
+    // } else {
+    //     // code for IE6, IE5
+    //     xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+    // }
+    // xmlhttp.onreadystatechange = function() {
+    //     if (this.readyState == 4 && this.status == 200) {
+    //         console.log(this.responseText);
+    //     }
+    // };
+    // var str = "Peter Griffin";
+    // xmlhttp.open("GET","./get.php?q="+str,true);
+    // xmlhttp.send();
+    //
+    // console.log(xmlhttp.responseText);
+    /////////////////////////////////////////////////
 }
 
 function updateAll(cur_sx) {
+    preset = sleep.toString()+"/"+calories.toString()+"/"+steps.toString();
     planeGeo.verticesNeedUpdate = true;
     for (var i = 0; i < lineGeos.length; i++) {
         lineGeos[i].verticesNeedUpdate = true;
     }
-
     drawTrench(cur_sx, false);
     putBall();
 }

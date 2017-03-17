@@ -7,6 +7,7 @@
 			canvas { width: 100%; height: 100% }
 		</style>
 	</head>
+
 	<body>
 		<div id="container"></div>
 		<script src="js/libs/three.min.js"></script>
@@ -70,7 +71,7 @@
                 camera.position.z = 4;
                 scene = new THREE.Scene();
                 var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
-                directionalLight.position.set( 20, 20, 20 );
+                directionalLight.position.set( 0, -20, 20 );
                 scene.add( directionalLight );
 
                 renderer = new THREE.WebGLRenderer();
@@ -79,6 +80,7 @@
                 renderer.setSize( window.innerWidth, window.innerHeight );
 
                 var controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.enableRotate = false;
                 controls.minDistance = 1;
                 controls.maxDistance = 100;
 
@@ -130,17 +132,17 @@
             }
 
             function onValueAChange( event ) {
-				a = event.detail.value * a_max;
+				sleep = event.detail.value;
                 updateAll(sx);
             }
 
             function onValueBChange( event ) {
-                b = event.detail.value * b_max;
+                calories = event.detail.value;
                 updateAll(sx);
             }
 
             function onValueCChange( event ) {
-                c = event.detail.value * c_max;
+                steps = event.detail.value;
                 updateAll(sx);
             }
 

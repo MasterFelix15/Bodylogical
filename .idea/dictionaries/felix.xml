@@ -2,6 +2,7 @@
   <dictionary name="felix">
     <words>
       <w>linewidth</w>
+      <w>onreadystatechange</w>
       <w>wireframe</w>
     </words>
   </dictionary>
